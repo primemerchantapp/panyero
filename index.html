@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playstores Install Panyero</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .slider-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .slide .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ddd;
+            cursor: pointer;
+        }
+
+        .progress-dot.active {
+            background-color: #6CBF41;
+        }
+
+        /* Updated button color to match Cash In and Transfer buttons */
+        .get-started-button {
+            position: absolute;
+            bottom: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 50px;
+            background-color: rgb(5, 150, 105); /* RGB color matching Cash In and Transfer buttons */
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .get-started-button:hover {
+            background-color: rgba(5, 150, 105, 0.9); /* Slightly transparent on hover */
+        }
+
+        .install-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .install-banner {
+            background-color: white;
+            border-radius: 10px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 300px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .install-banner img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="slider-container">
+        <div class="slide active">
+            <div class="content">
+                <h2 class="text-2xl font-bold mb-4">Welcome to Panyero App</h2>
+                <p class="text-lg mb-6">Your all-in-one financial solution.</p>
+            </div>
+            <img src="https://playstore.panyero.website/assets/images/onboarding/1.png" alt="Onboarding 1">
+        </div>
+        <div class="slide">
+            <div class="content">
+                <h2 class="text-2xl font-bold mb-4">Manage Your Finances</h2>
+                <p class="text-lg mb-6">Track your expenses and income easily.</p>
+            </div>
+            <img src="https://playstore.panyero.website/assets/images/onboarding/2.webp" alt="Onboarding 2">
+        </div>
+        <div class="slide">
+            <div class="content">
+                <h2 class="text-2xl font-bold mb-4">Send and Receive Money</h2>
+                <p class="text-lg mb-6">Transfer funds securely and quickly.</p>
+            </div>
+            <img src="https://playstore.panyero.website/assets/images/onboarding/3.webp" alt="Onboarding 3">
+        </div>
+        <div class="slide">
+            <div class="content">
+                <h2 class="text-2xl font-bold mb-4">Explore Our Services</h2>
+                <p class="text-lg mb-6">Discover a range of financial services.</p>
+            </div>
+            <img src="https://playstore.panyero.website/assets/images/onboarding/4.webp" alt="Onboarding 4">
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-dot active" data-index="0"></div>
+        <div class="progress-dot" data-index="1"></div>
+        <div class="progress-dot" data-index="2"></div>
+        <div class="progress-dot" data-index="3"></div>
+    </div>
+
+    <div id="installModal" class="install-modal hidden">
+        <div class="install-banner" onclick="simulateInstall()">
+            <img src="/assets/images/logo/install.png" alt="Install Banner">
+        </div>
+    </div>
+
+    <div class="get-started-button" onclick="window.location.href='main/signup.html'">
+        Get Started
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const progressDots = document.querySelectorAll('.progress-dot');
+        const installModal = document.getElementById('installModal');
+        let currentSlide = 0;
+        let autoSlideInterval;
+        let deferredPrompt; // For storing the prompt
+
+        function simulateInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        alert(`App Installed`); // Simplified message
+                    } else {
+                        alert(`User dismissed installation`); // Updated message
+                    }
+                    deferredPrompt = null; // clear the prompt
+                    installModal.classList.add('hidden'); // hide once button is clicked
+                });
+            } else {
+                alert(`App Installed`); // Simplified message for simulation
+                installModal.classList.add('hidden');
+            }
+        }
+
+        function showSlide(index) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            progressDots.forEach(dot => dot.classList.remove('active'));
+            slides[index].classList.add('active');
+            progressDots[index].classList.add('active');
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            showSlide(currentSlide);
+        }
+
+        function startAutoSlide() {
+            autoSlideInterval = setInterval(nextSlide, 5000);
+        }
+
+        function stopAutoSlide() {
+            clearInterval(autoSlideInterval);
+        }
+
+        window.onload = () => {
+            setTimeout(() => {
+                installModal.classList.remove('hidden');
+            }, 2000);
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        progressDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                stopAutoSlide();
+                currentSlide = parseInt(dot.dataset.index);
+                showSlide(currentSlide);
+                startAutoSlide();
+            });
+        });
+
+        showSlide(currentSlide);
+        startAutoSlide();
+    </script>
+</body>
+
+</html>
